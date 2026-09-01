@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>সাপ খেলা | Snake</title>
+<style>
+  :root{
+    --bg: #12140f;
+    --panel: #1a1d15;
+    --p1: #b7e04a;
+    --p1-head: #d8ff6b;
+    --p2: #4ac2e0;
+    --p2-head: #7fe3ff;
+    --food: #ff8a3d;
+    --text: #e8e6d8;
+    --muted: #8a9078;
+    --border: #3a3f2c;
+  }
+  *{ box-sizing: border-box; }
+  html, body{
+    margin:0; padding:0; min-height:100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Courier New', ui-monospace, monospace;
+    display:flex; align-items:center; justify-content:center;
+    overflow-x:hidden;
+  }
+  .wrap{
+    display:flex; flex-direction:column; align-items:center;
+    gap:14px; padding:20px; width:100%; max-width:520px;
+  }
+  h1{
+    font-size:1.3rem; letter-spacing:0.08em; margin:0;
+    color: var(--p1-head);
+    font-weight:700;
+  }
+  .subtitle{ color:var(--muted); font-size:0.8rem; margin-top:-8px; text-align:center;}
+  .mode-toggle{
+    display:flex; gap:8px; width:100%;
+  }
+  .mode-toggle button{
+    flex:1; background: var(--panel); color: var(--muted);
+    border:1px solid var(--border); padding:8px; border-radius:4px;
+    font-family:inherit; font-size:0.8rem; cursor:pointer; letter-spacing:0.03em;
+  }
+  .mode-toggle button.active{
+    background: var(--p1); color:#1a1d0f; border-color:var(--p1); font-weight:700;
+  }
+  .hud{
+    display:flex; justify-content:space-between; width:100%;
+    font-size:0.9rem; padding:0 4px; flex-wrap:wrap; gap:6px;
+  }
+  .hud span{ color: var(--muted); }
+  .hud b{ color: var(--text); }
+  .hud .p1 b{ color: var(--p1-head); }
+  .hud .p2 b{ color: var(--p2-head); }
+  .board-frame{
+    position:relative;
+    border: 3px solid var(--border);
+    border-radius:6px;
+    background: var(--panel);
+    box-shadow: 0 0 0 6px #0d0f0a, 0 12px 30px rgba(0,0,0,0.5);
+    width:100%;
+    aspect-ratio: 1/1;
+  }
+  canvas{
+    display:block; width:100%; height:100%;
+    image-rendering: pixelated;
+  }
+  .overlay{
+    position:absolute; inset:0;
+    background: rgba(10,11,7,0.9);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; text-align:center; padding:20px;
+    border-radius:4px;
+  }
+  .overlay h2{ margin:0; color: var(--food); font-size:1.4rem; letter-spacing:0.05em;}
+  .overlay p{ margin:0; color:var(--muted); font-size:0.85rem; max-width:300px; line-height:1.5;}
+  .overlay .keys{
+    font-size:0.78rem; color:var(--text); background:#0d0f0a;
+    padding:10px 14px; border-radius:4px; border:1px solid var(--border);
+    line-height:1.6;
+  }
+  button.primary{
+    font-family: inherit;
+    background: var(--p1);
+    color: #1a1d0f;
+    border:none; padding:10px 22px; border-radius:4px;
+    font-weight:700; font-size:0.95rem; cursor:pointer;
+    letter-spacing:0.03em;
+    transition: transform 0.08s ease;
+  }
+  button.primary:active{ transform: scale(0.95); }
+  .hidden{ display:none; }
+  .controls-row{
+    display:flex; gap:22px; margin-top:4px; justify-content:center; width:100%;
+  }
+  .controls{
+    display:grid; grid-template-columns: repeat(3, 50px);
+    grid-template-rows: repeat(2, 50px);
+    gap:6px;
+  }
+  .controls button{
+    width:50px; height:50px; font-size:1.1rem;
+    background: var(--panel); border:1px solid var(--border);
+    font-family:inherit; cursor:pointer;
+  }
+  .controls.p1 button{ color: var(--p1); }
+  .controls.p2 button{ color: var(--p2); }
+  .ctrl-up{ grid-column:2; grid-row:1;}
+  .ctrl-left{ grid-column:1; grid-row:2;}
+  .ctrl-down{ grid-column:2; grid-row:2;}
+  .ctrl-right{ grid-column:3; grid-row:2;}
+  .hint{ color:var(--muted); font-size:0.75rem; text-align:center; }
+  @media (min-width: 640px){
+    .controls{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>SNAKE</h1>
+  <div class="subtitle" id="subtitle">তীর চিহ্ন / WASD দিয়ে চালাও</div>
+
+  <div class="mode-toggle">
+    <button id="mode1p" class="active">১ জন</button>
+    <button id="mode2p">২ জন (একই ডিভাইসে)</button>
+  </div>
+
+  <div class="hud" id="hud1p">
+    <span>স্কোর: <b id="score">0</b></span>
+    <span>সেরা: <b id="best">0</b></span>
+    <span>লেভেল: <b id="level">1</b></span>
+  </div>
+  <div class="hud hidden" id="hud2p">
+    <span class="p1">প্লেয়ার ১: <b id="score1">0</b></span>
+    <span class="p2">প্লেয়ার ২: <b id="score2">0</b></span>
+  </div>
+
+  <div class="board-frame">
+    <canvas id="game"></canvas>
+    <div class="overlay" id="startOverlay">
+      <h2 id="startTitle">খেলা শুরু করো</h2>
+      <p id="startDesc">খাবার খেয়ে সাপকে বড় করো। নিজের গায়ে বা দেয়ালে ধাক্কা দিলে খেলা শেষ।</p>
+      <div class="keys hidden" id="keysInfo">
+        <b style="color:var(--p1-head)">প্লেয়ার ১</b> — WASD<br>
+        <b style="color:var(--p2-head)">প্লেয়ার ২</b> — Arrow keys
+      </div>
+      <button class="primary" id="startBtn">শুরু করো</button>
+    </div>
+    <div class="overlay hidden" id="overOverlay">
+      <h2 id="overTitle">খেলা শেষ!</h2>
+      <p id="finalScoreText"></p>
+      <button class="primary" id="retryBtn">আবার খেলো</button>
+    </div>
+  </div>
+
+  <div class="controls-row" id="controlsRow">
+    <div class="controls p1">
+      <button class="ctrl-up" data-player="1" data-dir="up">↑</button>
+      <button class="ctrl-left" data-player="1" data-dir="left">←</button>
+      <button class="ctrl-down" data-player="1" data-dir="down">↓</button>
+      <button class="ctrl-right" data-player="1" data-dir="right">→</button>
+    </div>
+    <div class="controls p2 hidden" id="p2Controls">
+      <button class="ctrl-up" data-player="2" data-dir="up">↑</button>
+      <button class="ctrl-left" data-player="2" data-dir="left">←</button>
+      <button class="ctrl-down" data-player="2" data-dir="down">↓</button>
+      <button class="ctrl-right" data-player="2" data-dir="right">→</button>
+    </div>
+  </div>
+  <div class="hint" id="hint">মোবাইলে সোয়াইপ করেও খেলা যাবে</div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const GRID = 20;
+  let cellSize;
+
+  function resize(){
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const size = Math.floor(rect.width);
+    canvas.width = size;
+    canvas.height = size;
+    cellSize = size / GRID;
+    draw();
+  }
+  window.addEventListener('resize', resize);
+
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const levelEl = document.getElementById('level');
+  const score1El = document.getElementById('score1');
+  const score2El = document.getElementById('score2');
+  const hud1p = document.getElementById('hud1p');
+  const hud2p = document.getElementById('hud2p');
+  const startOverlay = document.getElementById('startOverlay');
+  const overOverlay = document.getElementById('overOverlay');
+  const finalScoreText = document.getElementById('finalScoreText');
+  const overTitle = document.getElementById('overTitle');
+  const startTitle = document.getElementById('startTitle');
+  const startDesc = document.getElementById('startDesc');
+  const keysInfo = document.getElementById('keysInfo');
+  const subtitle = document.getElementById('subtitle');
+  const mode1pBtn = document.getElementById('mode1p');
+  const mode2pBtn = document.getElementById('mode2p');
+  const p2Controls = document.getElementById('p2Controls');
+  const hint = document.getElementById('hint');
+
+  let best = parseInt(localStorage.getItem('snake_best') || '0', 10);
+  bestEl.textContent = best;
+
+  let mode = '1p';
+  let running = false;
+  let loopHandle;
+
+  let snake, dir, nextDir, food, score, level, baseSpeed, speed;
+  let s1, s2, dir1, dir2, nextDir1, nextDir2, score1, score2;
+
+  function setMode(m){
+    mode = m;
+    mode1pBtn.classList.toggle('active', m==='1p');
+    mode2pBtn.classList.toggle('active', m==='2p');
+    hud1p.classList.toggle('hidden', m!=='1p');
+    hud2p.classList.toggle('hidden', m!=='2p');
+    p2Controls.classList.toggle('hidden', m!=='2p');
+    keysInfo.classList.toggle('hidden', m!=='2p');
+    subtitle.textContent = m==='1p'
+      ? 'তীর চিহ্ন / WASD দিয়ে চালাও'
+      : 'প্লেয়ার ১: WASD | প্লেয়ার ২: Arrow keys';
+    startTitle.textContent = m==='1p' ? 'খেলা শুরু করো' : '২ জনের খেলা';
+    startDesc.textContent = m==='1p'
+      ? 'খাবার খেয়ে সাপকে বড় করো। নিজের গায়ে বা দেয়ালে ধাক্কা দিলে খেলা শেষ।'
+      : 'দুজনে একসাথে খেলো। কেউ দেয়াল, নিজের গায়ে, বা অন্যজনের সাপে ধাক্কা দিলে সে হেরে যাবে।';
+    hint.textContent = m==='1p' ? 'মোবাইলে সোয়াইপ করেও খেলা যাবে' : 'একই কীবোর্ডে দুজনে খেলবে — WASD বনাম Arrow keys';
+    reset();
+    draw();
+  }
+
+  function reset(){
+    running = false;
+    clearInterval(loopHandle);
+    overOverlay.classList.add('hidden');
+    if(mode === '1p'){
+      snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+      dir = 'right'; nextDir = 'right';
+      score = 0; level = 1; baseSpeed = 140; speed = baseSpeed;
+      scoreEl.textContent = score;
+      levelEl.textContent = level;
+      placeFood();
+    } else {
+      s1 = [{x:5,y:10},{x:4,y:10},{x:3,y:10}];
+      s2 = [{x:14,y:10},{x:15,y:10},{x:16,y:10}];
+      dir1='right'; nextDir1='right';
+      dir2='left'; nextDir2='left';
+      score1=0; score2=0;
+      score1El.textContent=0; score2El.textContent=0;
+      speed = 130;
+      placeFood();
+    }
+  }
+
+  function occupiedCells(){
+    if(mode==='1p') return snake;
+    return [...s1, ...s2];
+  }
+
+  function placeFood(){
+    let valid = false;
+    while(!valid){
+      food = { x: Math.floor(Math.random()*GRID), y: Math.floor(Math.random()*GRID) };
+      valid = !occupiedCells().some(s => s.x === food.x && s.y === food.y);
+    }
+  }
+
+  function draw(){
+    if(!cellSize) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ctx.strokeStyle = 'rgba(183,224,74,0.05)';
+    ctx.lineWidth = 1;
+    for(let i=1;i<GRID;i++){
+      ctx.beginPath();
+      ctx.moveTo(i*cellSize,0); ctx.lineTo(i*cellSize, canvas.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0,i*cellSize); ctx.lineTo(canvas.width, i*cellSize);
+      ctx.stroke();
+    }
+
+    if(food){
+      const fx = food.x*cellSize, fy = food.y*cellSize;
+      ctx.fillStyle = '#ff8a3d';
+      ctx.beginPath();
+      ctx.arc(fx+cellSize/2, fy+cellSize/2, cellSize*0.35, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    function drawSnake(arr, colorHead, colorBody){
+      arr.forEach((s, i) => {
+        const x = s.x*cellSize, y = s.y*cellSize;
+        ctx.fillStyle = i===0 ? colorHead : colorBody;
+        const pad = cellSize*0.08;
+        ctx.fillRect(x+pad, y+pad, cellSize-pad*2, cellSize-pad*2);
+      });
+    }
+
+    if(mode==='1p'){
+      drawSnake(snake, '#d8ff6b', '#b7e04a');
+    } else {
+      drawSnake(s1, '#d8ff6b', '#b7e04a');
+      drawSnake(s2, '#7fe3ff', '#4ac2e0');
+    }
+  }
+
+  function tick(){
+    if(mode==='1p') return tick1p();
+    return tick2p();
+  }
+
+  function tick1p(){
+    dir = nextDir;
+    const head = { ...snake[0] };
+    if(dir==='up') head.y--;
+    if(dir==='down') head.y++;
+    if(dir==='left') head.x--;
+    if(dir==='right') head.x++;
+
+    if(head.x<0 || head.x>=GRID || head.y<0 || head.y>=GRID) return gameOver1p();
+    if(snake.some(s => s.x===head.x && s.y===head.y)) return gameOver1p();
+
+    snake.unshift(head);
+
+    if(head.x===food.x && head.y===food.y){
+      score += 10;
+      scoreEl.textContent = score;
+      if(score % 50 === 0){
+        level++;
+        levelEl.textContent = level;
+        speed = Math.max(60, baseSpeed - (level-1)*12);
+        restartLoop();
+      }
+      placeFood();
+    } else {
+      snake.pop();
+    }
+    draw();
+  }
+
+  function tick2p(){
+    dir1 = nextDir1;
+    dir2 = nextDir2;
+
+    const h1 = { ...s1[0] };
+    if(dir1==='up') h1.y--;
+    if(dir1==='down') h1.y++;
+    if(dir1==='left') h1.x--;
+    if(dir1==='right') h1.x++;
+
+    const h2 = { ...s2[0] };
+    if(dir2==='up') h2.y--;
+    if(dir2==='down') h2.y++;
+    if(dir2==='left') h2.x--;
+    if(dir2==='right') h2.x++;
+
+    const dead1 = h1.x<0||h1.x>=GRID||h1.y<0||h1.y>=GRID ||
+      s1.some(s=>s.x===h1.x&&s.y===h1.y) ||
+      s2.some(s=>s.x===h1.x&&s.y===h1.y) ||
+      (h1.x===h2.x && h1.y===h2.y);
+
+    const dead2 = h2.x<0||h2.x>=GRID||h2.y<0||h2.y>=GRID ||
+      s2.some(s=>s.x===h2.x&&s.y===h2.y) ||
+      s1.some(s=>s.x===h2.x&&s.y===h2.y) ||
+      (h1.x===h2.x && h1.y===h2.y);
+
+    if(dead1 || dead2){
+      return gameOver2p(dead1, dead2);
+    }
+
+    s1.unshift(h1);
+    s2.unshift(h2);
+
+    let ateFood = false;
+    if(h1.x===food.x && h1.y===food.y){
+      score1 += 10; score1El.textContent = score1;
+      ateFood = true;
+    } else {
+      s1.pop();
+    }
+    if(h2.x===food.x && h2.y===food.y){
+      score2 += 10; score2El.textContent = score2;
+      ateFood = true;
+    } else {
+      s2.pop();
+    }
+    if(ateFood) placeFood();
+
+    draw();
+  }
+
+  function restartLoop(){
+    clearInterval(loopHandle);
+    loopHandle = setInterval(tick, speed);
+  }
+
+  function gameOver1p(){
+    running = false;
+    clearInterval(loopHandle);
+    if(score > best){
+      best = score;
+      localStorage.setItem('snake_best', best);
+      bestEl.textContent = best;
+    }
+    overTitle.textContent = 'খেলা শেষ!';
+    finalScoreText.textContent = `তোমার স্কোর: ${score}`;
+    overOverlay.classList.remove('hidden');
+  }
+
+  function gameOver2p(dead1, dead2){
+    running = false;
+    clearInterval(loopHandle);
+    overTitle.textContent = 'খেলা শেষ!';
+    let text;
+    if(dead1 && dead2){
+      text = `ড্র! প্লেয়ার ১: ${score1} — প্লেয়ার ২: ${score2}`;
+    } else if(dead1){
+      text = `প্লেয়ার ২ জিতেছে! স্কোর — ১: ${score1}, ২: ${score2}`;
+    } else {
+      text = `প্লেয়ার ১ জিতেছে! স্কোর — ১: ${score1}, ২: ${score2}`;
+    }
+    finalScoreText.textContent = text;
+    overOverlay.classList.remove('hidden');
+  }
+
+  function startGame(){
+    reset();
+    startOverlay.classList.add('hidden');
+    overOverlay.classList.add('hidden');
+    running = true;
+    draw();
+    restartLoop();
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('retryBtn').addEventListener('click', startGame);
+  mode1pBtn.addEventListener('click', () => { if(!running) setMode('1p'); });
+  mode2pBtn.addEventListener('click', () => { if(!running) setMode('2p'); });
+
+  const opposite = { up:'down', down:'up', left:'right', right:'left' };
+
+  function setDir1(d){
+    if(!running) return;
+    const current = mode==='1p' ? dir : dir1;
+    if(opposite[d] === current) return;
+    if(mode==='1p') nextDir = d; else nextDir1 = d;
+  }
+  function setDir2(d){
+    if(!running || mode!=='2p') return;
+    if(opposite[d] === dir2) return;
+    nextDir2 = d;
+  }
+
+  window.addEventListener('keydown', (e) => {
+    const wasd = { w:'up', s:'down', a:'left', d:'right', W:'up', S:'down', A:'left', D:'right' };
+    const arrows = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right' };
+
+    if(wasd[e.key]){
+      e.preventDefault();
+      setDir1(wasd[e.key]);
+    } else if(arrows[e.key]){
+      e.preventDefault();
+      if(mode==='1p') setDir1(arrows[e.key]);
+      else setDir2(arrows[e.key]);
+    }
+    if(e.key === ' ' && !running) startGame();
+  });
+
+  document.querySelectorAll('.controls button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.player;
+      const d = btn.dataset.dir;
+      if(p === '1') setDir1(d); else setDir2(d);
+    });
+  });
+
+  let touchStartX=0, touchStartY=0;
+  canvas.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, {passive:true});
+  canvas.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dx) > Math.abs(dy)){
+      setDir1(dx > 0 ? 'right' : 'left');
+    } else {
+      setDir1(dy > 0 ? 'down' : 'up');
+    }
+  }, {passive:true});
+
+  setMode('1p');
+  resize();
+})();
+</script>
+</body>
+</html>
