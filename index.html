@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>সাপ খেলা | Multiplayer Snake</title>
-<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<title>সাপ খেলা | Snake</title>
 <style>
   :root{
     --bg: #12140f;
@@ -21,7 +20,8 @@
   *{ box-sizing: border-box; }
   html, body{
     margin:0; padding:0; min-height:100%;
-    background: var(--bg); color: var(--text);
+    background: var(--bg);
+    color: var(--text);
     font-family: 'Courier New', ui-monospace, monospace;
     display:flex; align-items:center; justify-content:center;
     overflow-x:hidden;
@@ -32,10 +32,13 @@
   }
   h1{
     font-size:1.3rem; letter-spacing:0.08em; margin:0;
-    color: var(--p1-head); font-weight:700;
+    color: var(--p1-head);
+    font-weight:700;
   }
   .subtitle{ color:var(--muted); font-size:0.8rem; margin-top:-8px; text-align:center;}
-  .mode-toggle{ display:flex; gap:8px; width:100%; }
+  .mode-toggle{
+    display:flex; gap:8px; width:100%;
+  }
   .mode-toggle button{
     flex:1; background: var(--panel); color: var(--muted);
     border:1px solid var(--border); padding:8px; border-radius:4px;
@@ -53,33 +56,71 @@
   .hud .p1 b{ color: var(--p1-head); }
   .hud .p2 b{ color: var(--p2-head); }
   .board-frame{
-    position:relative; border: 3px solid var(--border); border-radius:6px;
-    background: var(--panel); box-shadow: 0 0 0 6px #0d0f0a, 0 12px 30px rgba(0,0,0,0.5);
-    width:100%; aspect-ratio: 1/1;
+    position:relative;
+    border: 3px solid var(--border);
+    border-radius:6px;
+    background: var(--panel);
+    box-shadow: 0 0 0 6px #0d0f0a, 0 12px 30px rgba(0,0,0,0.5);
+    width:100%;
+    aspect-ratio: 1/1;
   }
-  canvas{ display:block; width:100%; height:100%; image-rendering: pixelated; }
+  canvas{
+    display:block; width:100%; height:100%;
+    image-rendering: pixelated;
+  }
   .overlay{
-    position:absolute; inset:0; background: rgba(10,11,7,0.92);
+    position:absolute; inset:0;
+    background: rgba(10,11,7,0.92);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:10px; text-align:center; padding:20px; border-radius:4px;
+    gap:10px; text-align:center; padding:20px;
+    border-radius:4px;
   }
   .overlay h2{ margin:0; color: var(--food); font-size:1.4rem; letter-spacing:0.05em;}
-  .overlay p{ margin:0; color:var(--muted); font-size:0.85rem; max-width:320px; line-height:1.5;}
+  .overlay p{ margin:0; color:var(--muted); font-size:0.85rem; max-width:300px; line-height:1.5;}
+  .overlay .keys{
+    font-size:0.78rem; color:var(--text); background:#0d0f0a;
+    padding:10px 14px; border-radius:4px; border:1px solid var(--border);
+    line-height:1.6;
+  }
+  .room-code{
+    font-size:2.4rem; letter-spacing:0.15em; font-weight:700;
+    color: var(--p1-head); background:#0d0f0a; padding:10px 22px;
+    border-radius:6px; border:1px solid var(--border);
+  }
+  .countdown-num{
+    font-size:5rem; font-weight:700; color: var(--p1-head);
+  }
+  input.code-input{
+    font-family:inherit; font-size:1.6rem; letter-spacing:0.2em;
+    text-align:center; width:160px; padding:8px; border-radius:4px;
+    border:1px solid var(--border); background:#0d0f0a; color:var(--text);
+  }
   button.primary{
-    font-family: inherit; background: var(--p1); color: #1a1d0f;
+    font-family: inherit;
+    background: var(--p1);
+    color: #1a1d0f;
     border:none; padding:10px 22px; border-radius:4px;
     font-weight:700; font-size:0.95rem; cursor:pointer;
-    letter-spacing:0.03em; transition: transform 0.08s ease;
+    letter-spacing:0.03em;
+    transition: transform 0.08s ease;
   }
   button.primary:active{ transform: scale(0.95); }
-  .hidden{ display:none !important; }
-  .controls-row{ display:flex; gap:22px; margin-top:4px; justify-content:center; width:100%; }
+  button.secondary{
+    font-family: inherit;
+    background: transparent;
+    color: var(--p2-head);
+    border:1px solid var(--border); padding:9px 18px; border-radius:4px;
+    font-weight:700; font-size:0.9rem; cursor:pointer;
+  }
+  .hidden{ display:none; }
+  .row-gap{ display:flex; flex-direction:column; gap:10px; align-items:center; width:100%; }
   .controls{
-    display:grid; grid-template-columns: repeat(3, 50px);
-    grid-template-rows: repeat(2, 50px); gap:6px;
+    display:grid; grid-template-columns: repeat(3, 56px);
+    grid-template-rows: repeat(2, 56px);
+    gap:6px;
   }
   .controls button{
-    width:50px; height:50px; font-size:1.1rem;
+    width:56px; height:56px; font-size:1.2rem;
     background: var(--panel); border:1px solid var(--border);
     font-family:inherit; cursor:pointer; color: var(--p1);
   }
@@ -88,18 +129,13 @@
   .ctrl-down{ grid-column:2; grid-row:2;}
   .ctrl-right{ grid-column:3; grid-row:2;}
   .hint{ color:var(--muted); font-size:0.75rem; text-align:center; }
-  
-  /* Online UI */
-  .net-box{
-    display:flex; flex-direction:column; gap:8px; width:100%; max-width:260px;
-    background:#12140f; padding:12px; border-radius:6px; border:1px solid var(--border);
+  .status-pill{
+    font-size:0.75rem; color:var(--muted); border:1px solid var(--border);
+    padding:3px 10px; border-radius:12px;
   }
-  .net-box input{
-    background:var(--panel); border:1px solid var(--border); color:var(--text);
-    padding:8px; border-radius:4px; text-align:center; font-family:inherit; font-size:1rem;
+  @media (min-width: 640px){
+    .controls{ display:none; }
   }
-  .room-code{ font-size:1.5rem; color:var(--p2-head); font-weight:bold; letter-spacing:2px; }
-  @media (min-width: 640px){ .controls{ display:none; } }
 </style>
 </head>
 <body>
@@ -109,7 +145,7 @@
 
   <div class="mode-toggle">
     <button id="mode1p" class="active">১ জন</button>
-    <button id="mode2p">২ জন (Online/LAN)</button>
+    <button id="mode2p">২ জন (অন্য ডিভাইসে)</button>
   </div>
 
   <div class="hud" id="hud1p">
@@ -118,45 +154,68 @@
     <span>লেভেল: <b id="level">1</b></span>
   </div>
   <div class="hud hidden" id="hud2p">
-    <span class="p1">প্লেয়ার ১ (সবুজ): <b id="score1">0</b></span>
-    <span class="p2">প্লেয়ার ২ (নীল): <b id="score2">0</b></span>
+    <span class="p1">প্লেয়ার ১: <b id="score1">0</b></span>
+    <span class="status-pill" id="connPill">সংযুক্ত হয়নি</span>
+    <span class="p2">প্লেয়ার ২: <b id="score2">0</b></span>
   </div>
 
   <div class="board-frame">
     <canvas id="game"></canvas>
-    
-    <div class="overlay" id="startOverlay">
-      <h2 id="startTitle">খেলা শুরু করো</h2>
-      <p id="startDesc">খাবার খেয়ে সাপকে বড় করো। নিজের গায়ে বা দেয়ালে ধাক্কা দিলে খেলা শেষ।</p>
-      
-      <div id="netSetup" class="net-box hidden">
-        <div id="hostSection">
-          <button class="primary" id="createRoomBtn" style="width:100%">রুম তৈরি করো (Host)</button>
-        </div>
-        <div id="joinSection" style="margin-top:6px;">
-          <input type="text" id="joinInput" placeholder="রুম কোড দাও" maxlength="4">
-          <button class="primary" id="joinRoomBtn" style="width:100%; margin-top:6px;">জয়েন করো</button>
-        </div>
-        <div id="statusMsg" style="font-size:0.8rem; color:var(--muted);"></div>
-      </div>
 
+    <!-- Single player start -->
+    <div class="overlay" id="startOverlay">
+      <h2>খেলা শুরু করো</h2>
+      <p>খাবার খেয়ে সাপকে বড় করো। নিজের গায়ে বা দেয়ালে ধাক্কা দিলে খেলা শেষ।</p>
       <button class="primary" id="startBtn">শুরু করো</button>
     </div>
 
+    <!-- Multiplayer lobby: choose create/join -->
+    <div class="overlay hidden" id="lobbyOverlay">
+      <h2>২ জনের খেলা</h2>
+      <p>একজন রুম তৈরি করবে, আরেকজন কোড দিয়ে যোগ দেবে — দুজন আলাদা ডিভাইস/ব্রাউজার থেকে।</p>
+      <div class="row-gap">
+        <button class="primary" id="createRoomBtn">রুম তৈরি করো</button>
+        <div style="color:var(--muted); font-size:0.8rem;">— অথবা —</div>
+        <input class="code-input" id="joinCodeInput" maxlength="4" placeholder="কোড" inputmode="numeric">
+        <button class="secondary" id="joinRoomBtn">রুমে যোগ দাও</button>
+      </div>
+    </div>
+
+    <!-- Host waiting for guest -->
+    <div class="overlay hidden" id="hostWaitOverlay">
+      <h2>অপেক্ষা করছি...</h2>
+      <p>এই কোডটা দ্বিতীয় প্লেয়ারকে দাও:</p>
+      <div class="room-code" id="hostCodeDisplay">----</div>
+      <p id="hostWaitStatus">প্লেয়ার ২-এর জন্য অপেক্ষা করছে...</p>
+      <button class="secondary" id="cancelHostBtn">বাতিল করো</button>
+    </div>
+
+    <!-- Guest waiting -->
+    <div class="overlay hidden" id="guestWaitOverlay">
+      <h2>কানেক্ট হচ্ছে...</h2>
+      <p id="guestWaitStatus">হোস্টের সাথে সংযোগ করা হচ্ছে...</p>
+    </div>
+
+    <!-- Countdown -->
+    <div class="overlay hidden" id="countdownOverlay">
+      <div class="countdown-num" id="countdownNum">৩</div>
+      <p>প্রস্তুত হও!</p>
+    </div>
+
+    <!-- Game over -->
     <div class="overlay hidden" id="overOverlay">
       <h2 id="overTitle">খেলা শেষ!</h2>
       <p id="finalScoreText"></p>
       <button class="primary" id="retryBtn">আবার খেলো</button>
+      <button class="secondary hidden" id="backToLobbyBtn">মেনুতে ফিরে যাও</button>
     </div>
   </div>
 
-  <div class="controls-row" id="controlsRow">
-    <div class="controls">
-      <button class="ctrl-up" data-dir="up">↑</button>
-      <button class="ctrl-left" data-dir="left">←</button>
-      <button class="ctrl-down" data-dir="down">↓</button>
-      <button class="ctrl-right" data-dir="right">→</button>
-    </div>
+  <div class="controls" id="controlsRow">
+    <button class="ctrl-up" data-dir="up">↑</button>
+    <button class="ctrl-left" data-dir="left">←</button>
+    <button class="ctrl-down" data-dir="down">↓</button>
+    <button class="ctrl-right" data-dir="right">→</button>
   </div>
   <div class="hint" id="hint">মোবাইলে সোয়াইপ করেও খেলা যাবে</div>
 </div>
@@ -178,6 +237,7 @@
   }
   window.addEventListener('resize', resize);
 
+  // ---------- UI refs ----------
   const scoreEl = document.getElementById('score');
   const bestEl = document.getElementById('best');
   const levelEl = document.getElementById('level');
@@ -185,229 +245,64 @@
   const score2El = document.getElementById('score2');
   const hud1p = document.getElementById('hud1p');
   const hud2p = document.getElementById('hud2p');
+  const connPill = document.getElementById('connPill');
+
   const startOverlay = document.getElementById('startOverlay');
+  const lobbyOverlay = document.getElementById('lobbyOverlay');
+  const hostWaitOverlay = document.getElementById('hostWaitOverlay');
+  const guestWaitOverlay = document.getElementById('guestWaitOverlay');
+  const countdownOverlay = document.getElementById('countdownOverlay');
   const overOverlay = document.getElementById('overOverlay');
-  const finalScoreText = document.getElementById('finalScoreText');
+
+  const hostCodeDisplay = document.getElementById('hostCodeDisplay');
+  const hostWaitStatus = document.getElementById('hostWaitStatus');
+  const guestWaitStatus = document.getElementById('guestWaitStatus');
+  const countdownNum = document.getElementById('countdownNum');
   const overTitle = document.getElementById('overTitle');
-  const startTitle = document.getElementById('startTitle');
-  const startDesc = document.getElementById('startDesc');
+  const finalScoreText = document.getElementById('finalScoreText');
+  const backToLobbyBtn = document.getElementById('backToLobbyBtn');
+
   const subtitle = document.getElementById('subtitle');
   const mode1pBtn = document.getElementById('mode1p');
   const mode2pBtn = document.getElementById('mode2p');
-  const startBtn = document.getElementById('startBtn');
-  const netSetup = document.getElementById('netSetup');
-  const statusMsg = document.getElementById('statusMsg');
-  const createRoomBtn = document.getElementById('createRoomBtn');
-  const joinRoomBtn = document.getElementById('joinRoomBtn');
-  const joinInput = document.getElementById('joinInput');
+  const hint = document.getElementById('hint');
+
+  const allOverlays = [startOverlay, lobbyOverlay, hostWaitOverlay, guestWaitOverlay, countdownOverlay, overOverlay];
+  function showOverlay(el){
+    allOverlays.forEach(o => o.classList.add('hidden'));
+    if(el) el.classList.remove('hidden');
+  }
 
   let best = parseInt(localStorage.getItem('snake_best') || '0', 10);
   bestEl.textContent = best;
 
-  let mode = '1p';
-  let running = false;
-  let loopHandle;
+  let mode = '1p'; // '1p' | '2p'
+  const BN_DIGITS = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+  function toBn(n){ return String(n).split('').map(c => BN_DIGITS[c] !== undefined ? BN_DIGITS[c] : c).join(''); }
 
-  // PeerJS state
-  let peer = null;
-  let conn = null;
-  let isHost = false;
-  let myPlayerNum = 1;
+  // ================= SINGLE PLAYER =================
+  let snake, dir, nextDir, food, score, level, baseSpeed, speed, spLoop;
 
-  let snake, dir, nextDir, food, score, level, baseSpeed, speed;
-  let s1, s2, dir1, dir2, nextDir1, nextDir2, score1, score2;
-
-  function setMode(m){
-    mode = m;
-    mode1pBtn.classList.toggle('active', m==='1p');
-    mode2pBtn.classList.toggle('active', m==='2p');
-    hud1p.classList.toggle('hidden', m!=='1p');
-    hud2p.classList.toggle('hidden', m!=='2p');
-    netSetup.classList.toggle('hidden', m!=='2p');
-    startBtn.classList.toggle('hidden', m==='2p');
-
-    if(m === '1p'){
-      subtitle.textContent = 'তীর চিহ্ন / WASD দিয়ে চালাও';
-      startTitle.textContent = 'খেলা শুরু করো';
-      startDesc.textContent = 'খাবার খেয়ে সাপকে বড় করো। নিজের গায়ে বা দেয়ালে ধাক্কা দিলে খেলা শেষ।';
-      if(peer) { peer.destroy(); peer = null; }
-    } else {
-      subtitle.textContent = 'অন্য ডিভাইসের সাথে কানেক্ট করো';
-      startTitle.textContent = 'মাল্টিপ্লেয়ার অনলাইন/LAN';
-      startDesc.textContent = 'একজন Host করে কোড শেয়ার করো, অন্যজন Join করো।';
-    }
-    reset();
+  function spReset(){
+    clearTimeout(spLoop);
+    snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
+    dir = 'right'; nextDir = 'right';
+    score = 0; level = 1; baseSpeed = 190; speed = baseSpeed;
+    scoreEl.textContent = score;
+    levelEl.textContent = level;
+    spPlaceFood();
     draw();
   }
 
-  // --- Networking logic ---
-  function initPeer(customCode = null) {
-    const peerId = customCode ? 'snake-room-' + customCode : 'snake-room-' + Math.floor(1000 + Math.random() * 9000);
-    peer = new Peer(peerId);
-
-    peer.on('open', (id) => {
-      const code = id.replace('snake-room-', '');
-      if(isHost) {
-        statusMsg.innerHTML = `রুম তৈরি হয়েছে! কোড: <span class="room-code">${code}</span><br>অন্য প্লেয়ারের অপেক্ষায়...`;
-      }
-    });
-
-    peer.on('connection', (c) => {
-      if(isHost) {
-        conn = c;
-        setupConnection();
-        statusMsg.textContent = "প্লেয়ার ২ কানেক্ট হয়েছে! খেলা শুরু হচ্ছে...";
-        setTimeout(startGameHost, 1000);
-      }
-    });
-
-    peer.on('error', (err) => {
-      statusMsg.textContent = "কানেকশন এরর: " + err.type;
-    });
-  }
-
-  createRoomBtn.addEventListener('click', () => {
-    isHost = true;
-    myPlayerNum = 1;
-    createRoomBtn.disabled = true;
-    joinRoomBtn.disabled = true;
-    statusMsg.textContent = "রুম তৈরি হচ্ছে...";
-    initPeer();
-  });
-
-  joinRoomBtn.addEventListener('click', () => {
-    const code = joinInput.value.trim();
-    if(!code) return alert("কোড দাও!");
-    isHost = false;
-    myPlayerNum = 2;
-    statusMsg.textContent = "কানেক্ট হচ্ছে...";
-    peer = new Peer();
-    peer.on('open', () => {
-      conn = peer.connect('snake-room-' + code);
-      setupConnection();
-    });
-  });
-
-  function setupConnection(){
-    conn.on('open', () => {
-      if(!isHost) statusMsg.textContent = "কানেক্টেড! হোস্ট গেম শুরু করার অপেক্ষায়...";
-    });
-
-    conn.on('data', (data) => {
-      if(data.type === 'input') {
-        if(isHost) {
-          if(data.dir) setDir2(data.dir);
-        }
-      } else if(data.type === 'sync') {
-        // Client receives state from Host
-        if(!isHost) {
-          s1 = data.s1;
-          s2 = data.s2;
-          food = data.food;
-          score1 = data.score1;
-          score2 = data.score2;
-          score1El.textContent = score1;
-          score2El.textContent = score2;
-          draw();
-        }
-      } else if(data.type === 'start') {
-        if(!isHost) {
-          startOverlay.classList.add('hidden');
-          overOverlay.classList.add('hidden');
-          running = true;
-        }
-      } else if(data.type === 'over') {
-        if(!isHost) gameOver2pUI(data.dead1, data.dead2);
-      }
-    });
-  }
-
-  function sendData(data){
-    if(conn && conn.open) conn.send(data);
-  }
-
-  // --- Game Mechanics ---
-  function reset(){
-    running = false;
-    clearInterval(loopHandle);
-    overOverlay.classList.add('hidden');
-    if(mode === '1p'){
-      snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
-      dir = 'right'; nextDir = 'right';
-      score = 0; level = 1; baseSpeed = 140; speed = baseSpeed;
-      scoreEl.textContent = score;
-      levelEl.textContent = level;
-      placeFood();
-    } else {
-      s1 = [{x:5,y:10},{x:4,y:10},{x:3,y:10}];
-      s2 = [{x:14,y:10},{x:15,y:10},{x:16,y:10}];
-      dir1='right'; nextDir1='right';
-      dir2='left'; nextDir2='left';
-      score1=0; score2=0;
-      score1El.textContent=0; score2El.textContent=0;
-      speed = 130;
-      if(isHost) placeFood();
-    }
-  }
-
-  function occupiedCells(){
-    if(mode==='1p') return snake;
-    return [...s1, ...s2];
-  }
-
-  function placeFood(){
+  function spPlaceFood(){
     let valid = false;
     while(!valid){
       food = { x: Math.floor(Math.random()*GRID), y: Math.floor(Math.random()*GRID) };
-      valid = !occupiedCells().some(s => s.x === food.x && s.y === food.y);
+      valid = !snake.some(s => s.x === food.x && s.y === food.y);
     }
   }
 
-  function draw(){
-    if(!cellSize) return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    ctx.strokeStyle = 'rgba(183,224,74,0.05)';
-    ctx.lineWidth = 1;
-    for(let i=1;i<GRID;i++){
-      ctx.beginPath();
-      ctx.moveTo(i*cellSize,0); ctx.lineTo(i*cellSize, canvas.height); ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(0,i*cellSize); ctx.lineTo(canvas.width, i*cellSize); ctx.stroke();
-    }
-
-    if(food){
-      const fx = food.x*cellSize, fy = food.y*cellSize;
-      ctx.fillStyle = '#ff8a3d';
-      ctx.beginPath();
-      ctx.arc(fx+cellSize/2, fy+cellSize/2, cellSize*0.35, 0, Math.PI*2);
-      ctx.fill();
-    }
-
-    function drawSnake(arr, colorHead, colorBody){
-      if(!arr) return;
-      arr.forEach((s, i) => {
-        const x = s.x*cellSize, y = s.y*cellSize;
-        ctx.fillStyle = i===0 ? colorHead : colorBody;
-        const pad = cellSize*0.08;
-        ctx.fillRect(x+pad, y+pad, cellSize-pad*2, cellSize-pad*2);
-      });
-    }
-
-    if(mode==='1p'){
-      drawSnake(snake, '#d8ff6b', '#b7e04a');
-    } else {
-      drawSnake(s1, '#d8ff6b', '#b7e04a');
-      drawSnake(s2, '#7fe3ff', '#4ac2e0');
-    }
-  }
-
-  function tick(){
-    if(mode==='1p') return tick1p();
-    if(isHost) return tick2pHost();
-  }
-
-  function tick1p(){
+  function spTick(){
     dir = nextDir;
     const head = { ...snake[0] };
     if(dir==='up') head.y--;
@@ -415,160 +310,433 @@
     if(dir==='left') head.x--;
     if(dir==='right') head.x++;
 
-    if(head.x<0 || head.x>=GRID || head.y<0 || head.y>=GRID) return gameOver1p();
-    if(snake.some(s => s.x===head.x && s.y===head.y)) return gameOver1p();
+    if(head.x<0 || head.x>=GRID || head.y<0 || head.y>=GRID) return spGameOver();
+    if(snake.some(s => s.x===head.x && s.y===head.y)) return spGameOver();
 
     snake.unshift(head);
 
     if(head.x===food.x && head.y===food.y){
-      score += 10; scoreEl.textContent = score;
-      if(score % 50 === 0){
-        level++; levelEl.textContent = level;
-        speed = Math.max(60, baseSpeed - (level-1)*12);
-        restartLoop();
-      }
-      placeFood();
+      score += 10;
+      scoreEl.textContent = score;
+      const newLevel = Math.floor(score/30) + 1;
+      if(newLevel !== level){ level = newLevel; levelEl.textContent = level; }
+      speed = Math.max(70, baseSpeed - score*1.1);
+      spPlaceFood();
     } else {
       snake.pop();
     }
     draw();
+    spLoop = setTimeout(spTick, speed);
   }
 
-  function tick2pHost(){
-    dir1 = nextDir1;
-    dir2 = nextDir2;
-
-    const h1 = { ...s1[0] };
-    if(dir1==='up') h1.y--; if(dir1==='down') h1.y++;
-    if(dir1==='left') h1.x--; if(dir1==='right') h1.x++;
-
-    const h2 = { ...s2[0] };
-    if(dir2==='up') h2.y--; if(dir2==='down') h2.y++;
-    if(dir2==='left') h2.x--; if(dir2==='right') h2.x++;
-
-    const dead1 = h1.x<0||h1.x>=GRID||h1.y<0||h1.y>=GRID ||
-      s1.some(s=>s.x===h1.x&&s.y===h1.y) || s2.some(s=>s.x===h1.x&&s.y===h1.y) || (h1.x===h2.x && h1.y===h2.y);
-
-    const dead2 = h2.x<0||h2.x>=GRID||h2.y<0||h2.y>=GRID ||
-      s2.some(s=>s.x===h2.x&&s.y===h2.y) || s1.some(s=>s.x===h2.x&&s.y===h2.y) || (h1.x===h2.x && h1.y===h2.y);
-
-    if(dead1 || dead2){
-      sendData({ type:'over', dead1, dead2 });
-      return gameOver2pUI(dead1, dead2);
-    }
-
-    s1.unshift(h1); s2.unshift(h2);
-
-    let ateFood = false;
-    if(h1.x===food.x && h1.y===food.y){ score1 += 10; score1El.textContent = score1; ateFood = true; } 
-    else { s1.pop(); }
-
-    if(h2.x===food.x && h2.y===food.y){ score2 += 10; score2El.textContent = score2; ateFood = true; } 
-    else { s2.pop(); }
-
-    if(ateFood) placeFood();
-
-    draw();
-    sendData({ type:'sync', s1, s2, food, score1, score2 });
-  }
-
-  function restartLoop(){
-    clearInterval(loopHandle);
-    loopHandle = setInterval(tick, speed);
-  }
-
-  function gameOver1p(){
-    running = false; clearInterval(loopHandle);
+  function spGameOver(){
     if(score > best){
-      best = score; localStorage.setItem('snake_best', best); bestEl.textContent = best;
+      best = score;
+      localStorage.setItem('snake_best', best);
+      bestEl.textContent = best;
     }
     overTitle.textContent = 'খেলা শেষ!';
     finalScoreText.textContent = `তোমার স্কোর: ${score}`;
-    overOverlay.classList.remove('hidden');
+    backToLobbyBtn.classList.add('hidden');
+    showOverlay(overOverlay);
   }
 
-  function gameOver2pUI(dead1, dead2){
-    running = false; clearInterval(loopHandle);
-    overTitle.textContent = 'খেলা শেষ!';
-    let text;
-    if(dead1 && dead2) text = `ড্র! প্লেয়ার ১: ${score1} — প্লেয়ার ২: ${score2}`;
-    else if(dead1) text = `প্লেয়ার ২ (নীল) জিতেছে! স্কোর — ১: ${score1}, ২: ${score2}`;
-    else text = `প্লেয়ার ১ (সবুজ) জিতেছে! স্কোর — ১: ${score1}, ২: ${score2}`;
-    
-    finalScoreText.textContent = text;
-    overOverlay.classList.remove('hidden');
-  }
-
-  function startGame(){
-    if(mode==='2p' && !isHost) return; 
-    reset();
-    startOverlay.classList.add('hidden');
-    overOverlay.classList.add('hidden');
-    running = true;
-    draw();
-    restartLoop();
-  }
-
-  function startGameHost(){
-    sendData({ type:'start' });
-    startGame();
-  }
-
-  document.getElementById('startBtn').addEventListener('click', startGame);
-  document.getElementById('retryBtn').addEventListener('click', () => {
-    if(mode === '1p') startGame();
-    else if(isHost) startGameHost();
-  });
-
-  mode1pBtn.addEventListener('click', () => { if(!running) setMode('1p'); });
-  mode2pBtn.addEventListener('click', () => { if(!running) setMode('2p'); });
-
-  const opposite = { up:'down', down:'up', left:'right', right:'left' };
-
-  function handleInput(d){
-    if(!running) return;
-    if(mode === '1p'){
-      if(opposite[d] !== dir) nextDir = d;
-    } else {
-      if(myPlayerNum === 1){
-        if(opposite[d] !== dir1) nextDir1 = d;
+  function spCountdownThenStart(){
+    spReset();
+    let n = 3;
+    countdownNum.textContent = toBn(n);
+    showOverlay(countdownOverlay);
+    const iv = setInterval(() => {
+      n--;
+      if(n > 0){
+        countdownNum.textContent = toBn(n);
       } else {
-        if(opposite[d] !== dir2) {
-          nextDir2 = d;
-          sendData({ type:'input', dir: d });
+        clearInterval(iv);
+        showOverlay(null);
+        spLoop = setTimeout(spTick, speed);
+      }
+    }, 700);
+  }
+
+  // ================= MULTIPLAYER (separate devices via shared storage) =================
+  let role = null; // 'host' | 'guest'
+  let roomCode = null;
+  let myDir = 'right';   // local player's committed direction
+  let myNextDir = 'right';
+
+  // host authoritative state
+  let hS1, hS2, hDir1, hDir2, hFood, hScore1, hScore2, hSpeed, hBaseSpeed, hLoopTimeout;
+  let hostWaitPoll;
+
+  // guest render state (mirrors host's published state)
+  let gState = null;
+  let guestPollTimeout;
+
+  function stateKey(code){ return `snake-state-${code}`; }
+  function inputKey(code){ return `snake-input2-${code}`; }
+
+  async function storageGetSafe(key, shared){
+    try{
+      const res = await window.storage.get(key, shared);
+      return res ? res.value : null;
+    } catch(e){ return null; }
+  }
+  async function storageSetSafe(key, value, shared){
+    try{ await window.storage.set(key, JSON.stringify(value), shared); }
+    catch(e){ /* best effort */ }
+  }
+
+  function genCode(){
+    return String(Math.floor(1000 + Math.random()*9000));
+  }
+
+  function mpOccupied(){ return [...(hS1||[]), ...(hS2||[])]; }
+
+  function mpPlaceFood(){
+    let valid = false;
+    let f;
+    while(!valid){
+      f = { x: Math.floor(Math.random()*GRID), y: Math.floor(Math.random()*GRID) };
+      valid = !mpOccupied().some(s => s.x===f.x && s.y===f.y);
+    }
+    return f;
+  }
+
+  // ---- HOST FLOW ----
+  async function hostCreateRoom(){
+    role = 'host';
+    roomCode = genCode();
+    hostCodeDisplay.textContent = roomCode;
+    hostWaitStatus.textContent = 'প্লেয়ার ২-এর জন্য অপেক্ষা করছে...';
+    showOverlay(hostWaitOverlay);
+    connPill.textContent = 'সংযুক্ত হয়নি';
+
+    // clear any stale input key for this fresh code (unlikely to collide, but safe)
+    await storageSetSafe(inputKey(roomCode), { dir:'left', joined:false, updatedAt: Date.now() }, true);
+
+    pollForGuest();
+  }
+
+  function pollForGuest(){
+    clearTimeout(hostWaitPoll);
+    hostWaitPoll = setTimeout(async () => {
+      const val = await storageGetSafe(inputKey(roomCode), true);
+      let joined = false;
+      if(val){
+        try{ joined = JSON.parse(val).joined === true; } catch(e){}
+      }
+      if(joined){
+        connPill.textContent = 'সংযুক্ত হয়েছে ✓';
+        hostStartCountdownAndGame();
+      } else {
+        pollForGuest();
+      }
+    }, 1000);
+  }
+
+  function hostSetupGame(){
+    hS1 = [{x:5,y:10},{x:4,y:10},{x:3,y:10}];
+    hS2 = [{x:14,y:10},{x:15,y:10},{x:16,y:10}];
+    hDir1 = 'right'; hDir2 = 'left';
+    myDir = 'right'; myNextDir = 'right';
+    hScore1 = 0; hScore2 = 0;
+    score1El.textContent = 0; score2El.textContent = 0;
+    hBaseSpeed = 180; hSpeed = hBaseSpeed;
+    hFood = mpPlaceFood();
+    draw2p(hS1, hS2, hFood);
+  }
+
+  async function hostStartCountdownAndGame(){
+    hostSetupGame();
+    let n = 3;
+    countdownNum.textContent = toBn(n);
+    showOverlay(countdownOverlay);
+    await publishHostState('countdown', n);
+    const iv = setInterval(async () => {
+      n--;
+      if(n > 0){
+        countdownNum.textContent = toBn(n);
+        await publishHostState('countdown', n);
+      } else {
+        clearInterval(iv);
+        showOverlay(null);
+        await publishHostState('playing', 0);
+        hLoopTimeout = setTimeout(hostTick, hSpeed);
+      }
+    }, 700);
+  }
+
+  async function publishHostState(status, countdown, winnerText){
+    const state = {
+      status, countdown: countdown||0,
+      s1: hS1, s2: hS2, food: hFood,
+      score1: hScore1, score2: hScore2,
+      winnerText: winnerText||'',
+      updatedAt: Date.now()
+    };
+    await storageSetSafe(stateKey(roomCode), state, true);
+  }
+
+  const OPPOSITE = { up:'down', down:'up', left:'right', right:'left' };
+
+  async function hostTick(){
+    // read guest's latest direction
+    const raw = await storageGetSafe(inputKey(roomCode), true);
+    let guestDir = hDir2;
+    if(raw){
+      try{
+        const parsed = JSON.parse(raw);
+        if(parsed.dir && OPPOSITE[parsed.dir] !== hDir2) guestDir = parsed.dir;
+      } catch(e){}
+    }
+    if(OPPOSITE[myNextDir] !== hDir1) hDir1 = myNextDir;
+    hDir2 = guestDir;
+
+    const h1 = { ...hS1[0] };
+    if(hDir1==='up') h1.y--;
+    if(hDir1==='down') h1.y++;
+    if(hDir1==='left') h1.x--;
+    if(hDir1==='right') h1.x++;
+
+    const h2 = { ...hS2[0] };
+    if(hDir2==='up') h2.y--;
+    if(hDir2==='down') h2.y++;
+    if(hDir2==='left') h2.x--;
+    if(hDir2==='right') h2.x++;
+
+    const dead1 = h1.x<0||h1.x>=GRID||h1.y<0||h1.y>=GRID ||
+      hS1.some(s=>s.x===h1.x&&s.y===h1.y) ||
+      hS2.some(s=>s.x===h1.x&&s.y===h1.y) ||
+      (h1.x===h2.x && h1.y===h2.y);
+
+    const dead2 = h2.x<0||h2.x>=GRID||h2.y<0||h2.y>=GRID ||
+      hS2.some(s=>s.x===h2.x&&s.y===h2.y) ||
+      hS1.some(s=>s.x===h2.x&&s.y===h2.y) ||
+      (h1.x===h2.x && h1.y===h2.y);
+
+    if(dead1 || dead2){
+      let winnerText;
+      if(dead1 && dead2) winnerText = `ড্র! প্লেয়ার ১: ${hScore1} — প্লেয়ার ২: ${hScore2}`;
+      else if(dead1) winnerText = `প্লেয়ার ২ জিতেছে! স্কোর — ১: ${hScore1}, ২: ${hScore2}`;
+      else winnerText = `প্লেয়ার ১ জিতেছে! স্কোর — ১: ${hScore1}, ২: ${hScore2}`;
+      await publishHostState('over', 0, winnerText);
+      overTitle.textContent = 'খেলা শেষ!';
+      finalScoreText.textContent = winnerText;
+      backToLobbyBtn.classList.remove('hidden');
+      showOverlay(overOverlay);
+      return;
+    }
+
+    hS1.unshift(h1);
+    hS2.unshift(h2);
+
+    let ateFood = false;
+    if(h1.x===hFood.x && h1.y===hFood.y){ hScore1 += 10; score1El.textContent = hScore1; ateFood = true; }
+    else hS1.pop();
+    if(h2.x===hFood.x && h2.y===hFood.y){ hScore2 += 10; score2El.textContent = hScore2; ateFood = true; }
+    else hS2.pop();
+
+    if(ateFood){
+      hFood = mpPlaceFood();
+      const total = hScore1 + hScore2;
+      hSpeed = Math.max(75, hBaseSpeed - total*0.6);
+    }
+
+    draw2p(hS1, hS2, hFood);
+    await publishHostState('playing', 0);
+    hLoopTimeout = setTimeout(hostTick, hSpeed);
+  }
+
+  async function hostRetry(){
+    clearTimeout(hLoopTimeout);
+    await hostStartCountdownAndGame();
+  }
+
+  // ---- GUEST FLOW ----
+  async function guestJoinRoom(code){
+    role = 'guest';
+    roomCode = code;
+    myDir = 'left'; myNextDir = 'left';
+    guestWaitStatus.textContent = 'হোস্টের সাথে সংযোগ করা হচ্ছে...';
+    showOverlay(guestWaitOverlay);
+    await storageSetSafe(inputKey(roomCode), { dir: myDir, joined: true, updatedAt: Date.now() }, true);
+    connPill.textContent = 'সংযুক্ত হয়েছে ✓';
+    guestPollState();
+  }
+
+  function guestPollState(){
+    clearTimeout(guestPollTimeout);
+    guestPollTimeout = setTimeout(async () => {
+      const raw = await storageGetSafe(stateKey(roomCode), true);
+      if(raw){
+        try{ gState = JSON.parse(raw); } catch(e){ gState = null; }
+      }
+      if(gState){
+        score1El.textContent = gState.score1;
+        score2El.textContent = gState.score2;
+        if(gState.status === 'countdown'){
+          countdownNum.textContent = toBn(gState.countdown);
+          showOverlay(countdownOverlay);
+          draw2p(gState.s1, gState.s2, gState.food);
+        } else if(gState.status === 'playing'){
+          showOverlay(null);
+          draw2p(gState.s1, gState.s2, gState.food);
+        } else if(gState.status === 'over'){
+          overTitle.textContent = 'খেলা শেষ!';
+          finalScoreText.textContent = gState.winnerText;
+          backToLobbyBtn.classList.remove('hidden');
+          showOverlay(overOverlay);
+          draw2p(gState.s1, gState.s2, gState.food);
         }
       }
+      guestPollState();
+    }, 120);
+  }
+
+  async function guestSendDir(d){
+    myNextDir = d;
+    await storageSetSafe(inputKey(roomCode), { dir: d, joined: true, updatedAt: Date.now() }, true);
+  }
+
+  // ================= DRAWING =================
+  function drawGridLines(){
+    ctx.strokeStyle = 'rgba(183,224,74,0.05)';
+    ctx.lineWidth = 1;
+    for(let i=1;i<GRID;i++){
+      ctx.beginPath(); ctx.moveTo(i*cellSize,0); ctx.lineTo(i*cellSize, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i*cellSize); ctx.lineTo(canvas.width, i*cellSize); ctx.stroke();
+    }
+  }
+  function drawFoodAt(f){
+    if(!f) return;
+    const fx = f.x*cellSize, fy = f.y*cellSize;
+    ctx.fillStyle = '#ff8a3d';
+    ctx.beginPath();
+    ctx.arc(fx+cellSize/2, fy+cellSize/2, cellSize*0.35, 0, Math.PI*2);
+    ctx.fill();
+  }
+  function drawSnakeArr(arr, colorHead, colorBody){
+    if(!arr) return;
+    arr.forEach((s, i) => {
+      const x = s.x*cellSize, y = s.y*cellSize;
+      ctx.fillStyle = i===0 ? colorHead : colorBody;
+      const pad = cellSize*0.08;
+      ctx.fillRect(x+pad, y+pad, cellSize-pad*2, cellSize-pad*2);
+    });
+  }
+
+  function draw(){
+    if(!cellSize) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drawGridLines();
+    drawFoodAt(food);
+    drawSnakeArr(snake, '#d8ff6b', '#b7e04a');
+  }
+
+  function draw2p(s1, s2, f){
+    if(!cellSize) return;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drawGridLines();
+    drawFoodAt(f);
+    drawSnakeArr(s1, '#d8ff6b', '#b7e04a');
+    drawSnakeArr(s2, '#7fe3ff', '#4ac2e0');
+  }
+
+  // ================= MODE / UI WIRING =================
+  function stopAllLoops(){
+    clearTimeout(spLoop);
+    clearTimeout(hLoopTimeout);
+    clearTimeout(hostWaitPoll);
+    clearTimeout(guestPollTimeout);
+  }
+
+  function setMode(m){
+    stopAllLoops();
+    mode = m;
+    role = null; roomCode = null; gState = null;
+    mode1pBtn.classList.toggle('active', m==='1p');
+    mode2pBtn.classList.toggle('active', m==='2p');
+    hud1p.classList.toggle('hidden', m!=='1p');
+    hud2p.classList.toggle('hidden', m!=='2p');
+    connPill.textContent = 'সংযুক্ত হয়নি';
+
+    if(m==='1p'){
+      subtitle.textContent = 'তীর চিহ্ন / WASD দিয়ে চালাও';
+      hint.textContent = 'মোবাইলে সোয়াইপ করেও খেলা যাবে';
+      spReset();
+      showOverlay(startOverlay);
+    } else {
+      subtitle.textContent = 'রুম তৈরি করো অথবা কোড দিয়ে যোগ দাও';
+      hint.textContent = 'দুজন আলাদা ডিভাইস/ব্রাউজার থেকে খেলবে';
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawGridLines();
+      showOverlay(lobbyOverlay);
     }
   }
 
-  function setDir1(d){ if(opposite[d] !== dir1) nextDir1 = d; }
-  function setDir2(d){ if(opposite[d] !== dir2) nextDir2 = d; }
+  mode1pBtn.addEventListener('click', () => setMode('1p'));
+  mode2pBtn.addEventListener('click', () => setMode('2p'));
+
+  document.getElementById('startBtn').addEventListener('click', spCountdownThenStart);
+
+  document.getElementById('createRoomBtn').addEventListener('click', hostCreateRoom);
+  document.getElementById('joinRoomBtn').addEventListener('click', () => {
+    const code = document.getElementById('joinCodeInput').value.trim();
+    if(code.length === 4) guestJoinRoom(code);
+  });
+  document.getElementById('cancelHostBtn').addEventListener('click', () => setMode('2p'));
+
+  document.getElementById('retryBtn').addEventListener('click', () => {
+    if(mode === '1p'){
+      spCountdownThenStart();
+    } else if(role === 'host'){
+      hostRetry();
+    } else {
+      showOverlay(guestWaitOverlay);
+      guestWaitStatus.textContent = 'হোস্ট আবার শুরু করার অপেক্ষায়...';
+    }
+  });
+  backToLobbyBtn.addEventListener('click', () => setMode('2p'));
+
+  // ---- input handling ----
+  function localSetDir(d){
+    if(mode === '1p'){
+      if(OPPOSITE[d] === dir) return;
+      nextDir = d;
+    } else if(role === 'host'){
+      if(OPPOSITE[d] === hDir1) return;
+      myNextDir = d;
+    } else if(role === 'guest'){
+      const current = (gState && gState.status === 'playing') ? myNextDir : myDir;
+      if(OPPOSITE[d] === current) return;
+      guestSendDir(d);
+    }
+  }
 
   window.addEventListener('keydown', (e) => {
-    const keys = {
-      ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
-      w:'up', s:'down', a:'left', d:'right', W:'up', S:'down', A:'left', D:'right'
-    };
-    if(keys[e.key]){
+    const wasd = { w:'up', s:'down', a:'left', d:'right', W:'up', S:'down', A:'left', D:'right' };
+    const arrows = { ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right' };
+    const d = wasd[e.key] || arrows[e.key];
+    if(d){
       e.preventDefault();
-      handleInput(keys[e.key]);
+      localSetDir(d);
     }
-    if(e.key === ' ' && !running && mode==='1p') startGame();
   });
 
-  document.querySelectorAll('.controls button').forEach(btn => {
-    btn.addEventListener('click', () => handleInput(btn.dataset.dir));
+  document.querySelectorAll('#controlsRow button').forEach(btn => {
+    btn.addEventListener('click', () => localSetDir(btn.dataset.dir));
   });
 
   let touchStartX=0, touchStartY=0;
   canvas.addEventListener('touchstart', (e) => {
-    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
   }, {passive:true});
   canvas.addEventListener('touchend', (e) => {
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
-    if(Math.abs(dx) > Math.abs(dy)) handleInput(dx > 0 ? 'right' : 'left');
-    else handleInput(dy > 0 ? 'down' : 'up');
+    if(Math.abs(dx) > Math.abs(dy)) localSetDir(dx > 0 ? 'right' : 'left');
+    else localSetDir(dy > 0 ? 'down' : 'up');
   }, {passive:true});
 
   setMode('1p');
