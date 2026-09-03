@@ -1,6 +1,6 @@
-# Snake Game 🐍
+# 🐍 Snake Game (সাপ খেলা)
 
-A retro-styled modern, browser-based Snake game built with HTML5 Canvas and vanilla JavaScript — no frameworks, no dependencies.
+A retro-styled, modern, browser-based Snake game built with HTML5 Canvas and vanilla JavaScript — no frameworks, no dependencies.
 
 ## 🎮 Live Demo
 
