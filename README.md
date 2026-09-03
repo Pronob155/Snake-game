@@ -1,52 +1,42 @@
-# 🐍 Snake Game (সাপ খেলা)
+# Snake Game 🐍
 
-A retro-styled, highly interactive, and responsive **Snake Game** built with pure HTML, CSS, and Vanilla JavaScript. Features both Single Player mode and Same-Device 2-Player competitive mode!
+A modern, browser-based Snake game built with HTML5 Canvas and vanilla JavaScript — no frameworks, no dependencies.
 
----
+## 🎮 Live Demo
 
-## 🚀 Live Demo
+Play it here: **[https://pronob155.github.io/Snake-game/](https://pronob155.github.io/Snake-game/)**
 
-Play the game directly in your browser:
-👉 **[https://pronob155.github.io/Snake-game/](https://pronob155.github.io/Snake-game/)**
+## Features
 
----
+- **Single Player** — classic Snake with a scoring system and best-score tracking (saved locally in your browser)
+- **Progressive difficulty** — the snake speeds up gradually as your score increases, instead of jumping suddenly
+- **Online Multiplayer (2 players, separate devices)** — one player creates a room and shares a 4-digit code, the other joins from their own device/browser to play head-to-head in real time
+- **3-2-1 countdown** before every match starts (single player and multiplayer)
+- **Keyboard controls** — Arrow keys or WASD
+- **Touch controls** — on-screen buttons and swipe gestures for mobile
+- **Responsive design** — scales to fit any screen size
 
-## ✨ Features
+## How to Play
 
-- 🎮 **Dual Game Modes**:
-  - **1 Player**: Classic snake action with increasing difficulty levels and high score tracking (persisted via `localStorage`).
-  - **2 Players**: Competitive local multiplayer mode on the same screen/keyboard.
-- 📱 **Fully Responsive & Mobile Friendly**:
-  - Touch swipe controls for mobile devices.
-  - On-screen touch D-Pad controls.
-- 🎨 **Retro Pixel Design**: Smooth Canvas-based rendering with custom retro styling and dark mode theme.
-- ⚡ **Zero External Dependencies**: Built entirely with native Web APIs (Canvas, HTML5, CSS3, ES6 JS).
+1. Choose **১ জন (Single Player)** or **২ জন (Multiplayer)** mode
+2. **Single player:** press Start, wait for the countdown, then steer the snake with arrow keys / WASD / swipe to eat food and grow
+3. **Multiplayer:**
+   - Player 1 clicks **রুম তৈরি করো (Create Room)** and shares the generated code
+   - Player 2 enters the code and clicks **রুমে যোগ দাও (Join Room)**
+   - Once connected, the countdown starts automatically and both players control their own snake
+4. Avoid hitting the walls, your own body, or (in multiplayer) the other snake
 
----
+## Tech Stack
 
-## 🕹️ Controls
+- HTML5 Canvas for rendering
+- Vanilla JavaScript (no external libraries)
+- `localStorage` for best-score persistence
+- Shared key-value storage for syncing multiplayer state between devices
 
-### 👤 1-Player Mode
-- **Keyboard**: `WASD` or `Arrow Keys`
-- **Mobile / Touch**: Touch screen swipe gesture or on-screen D-pad buttons
-- **Start / Restart**: `Spacebar` or tap on-screen button
+## Running Locally
 
-### 👥 2-Player Mode (Same Device)
-- **Player 1 (Green Snake)**: `WASD` keys or left D-pad
-- **Player 2 (Blue Snake)**: `Arrow Keys` or right D-pad
+Just open `index.html` (or the game file) in any modern browser — no build step or server required.
 
----
+## License
 
-## 🛠️ Tech Stack
-
-- **HTML5** (Canvas API)
-- **CSS3** (Custom properties, CSS Grid/Flexbox)
-- **JavaScript (ES6+)**
-
----
-
-## 💻 Local Setup & Installation
-
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/Pronob155/Snake-game.git](https://github.com/Pronob155/Snake-game.git)
+Feel free to fork, modify, and use this project for learning or personal purposes.
